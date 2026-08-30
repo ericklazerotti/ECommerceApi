@@ -1,0 +1,22 @@
+## .NET
+bin/
+obj/
+out/
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+## Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Environment / secrets (never commit real connection strings or keys)
+appsettings.*.local.json
+*.env
