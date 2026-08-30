@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using ECommerceApi.Api.Middleware;
 using ECommerceApi.Application;
 using ECommerceApi.Application.Common.Constants;
@@ -5,6 +6,7 @@ using ECommerceApi.Infrastructure;
 using ECommerceApi.Infrastructure.Identity;
 using ECommerceApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -41,6 +43,22 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Protege login/register contra brute-force e credential stuffing: no máximo
+// 10 tentativas por minuto por IP, sem fila (excedente recebe 429 na hora).
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("auth", httpContext => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0
+        }));
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -60,6 +78,8 @@ if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

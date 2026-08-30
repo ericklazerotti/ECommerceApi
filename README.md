@@ -89,6 +89,16 @@ A API fica disponível em `http://localhost:8080` (Swagger em `http://localhost:
 
 Todo push/PR para `master` roda build + testes via GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
+## Segurança
+
+- Senhas exigem mínimo de 8 caracteres, maiúscula, minúscula, número e caractere especial (validado tanto no FluentValidation quanto nas regras do Identity).
+- `POST /api/Auth/login` e `/register` têm rate limiting (10 requisições/minuto por IP) contra brute-force e credential stuffing; a conta também é bloqueada temporariamente após tentativas de login inválidas seguidas (lockout padrão do Identity).
+- Autorização por papel é sempre verificada no servidor via `[Authorize(Roles = ...)]`, nunca só escondida no cliente.
+- Nenhum segredo (connection string, chave JWT, senha de admin de desenvolvimento) fica hardcoded no repositório — tudo vem de `user-secrets` local ou variáveis de ambiente/`.env` no Docker, e sem fallback fraco caso não sejam definidos.
+- Mensagens de erro de login não revelam se o e-mail existe na base.
+
+Gaps conhecidos, deixados fora de escopo por ser um projeto de portfólio: sem refresh token/revogação (o JWT expira em 60min e não pode ser invalidado antes disso) e sem HSTS/security headers explícitos.
+
 ## Fluxo básico da API
 
 1. `POST /api/Auth/register` — cria um usuário com papel `Customer`.
