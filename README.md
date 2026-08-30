@@ -48,7 +48,7 @@ Opcionalmente, para ter um usuário Admin já criado em desenvolvimento:
 
 ```bash
 dotnet user-secrets set "DevSeedAdmin:Email" "admin@ecommerce.local"
-dotnet user-secrets set "DevSeedAdmin:Password" "Admin@12345"
+dotnet user-secrets set "DevSeedAdmin:Password" "TrocarEssaSenha@123"
 ```
 
 ### 2. Aplicar as migrations
