@@ -49,6 +49,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Desligado por padrão: em desenvolvimento local as migrations são aplicadas
+// via `dotnet ef database update`. O container Docker liga essa flag porque a
+// imagem de runtime não tem a ferramenta dotnet-ef instalada.
+if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+{
+    await ApplyMigrationsAsync(app);
+}
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
@@ -66,6 +74,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+static async Task ApplyMigrationsAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync();
+}
 
 static async Task SeedRolesAsync(WebApplication app)
 {

@@ -1,5 +1,7 @@
 # ECommerce API
 
+[![CI](https://github.com/ericklazerotti/ECommerceApi/actions/workflows/ci.yml/badge.svg)](https://github.com/ericklazerotti/ECommerceApi/actions/workflows/ci.yml)
+
 API REST em ASP.NET Core 8 para um sistema simplificado de e-commerce (produtos, categorias e pedidos), construída em arquitetura em camadas (Domain / Application / Infrastructure / Api) com autenticação JWT baseada em papéis.
 
 ## Stack
@@ -69,6 +71,23 @@ Swagger disponível em `https://localhost:7163/swagger` (ou a porta configurada 
 ```bash
 dotnet test
 ```
+
+## Rodando com Docker
+
+Sobe a API e o PostgreSQL juntos, sem precisar instalar nada além de Docker. As migrations são aplicadas automaticamente no start do container.
+
+```bash
+cp .env.example .env
+# edite o .env e defina POSTGRES_PASSWORD e JWT_KEY
+
+docker compose up --build
+```
+
+A API fica disponível em `http://localhost:8080` (Swagger em `http://localhost:8080/swagger`). Por padrão sobe com um usuário Admin já criado (`DEV_ADMIN_EMAIL`/`DEV_ADMIN_PASSWORD` no `.env`).
+
+## CI
+
+Todo push/PR para `master` roda build + testes via GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## Fluxo básico da API
 

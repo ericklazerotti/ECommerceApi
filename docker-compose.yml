@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ecommerce_api
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ecommerce_portfolio
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce_api -d ecommerce_portfolio"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/ECommerceApi.Api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ApplyMigrationsOnStartup: "true"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ecommerce_portfolio;Username=ecommerce_api;Password=${POSTGRES_PASSWORD}"
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: ECommerceApi
+      Jwt__Audience: ECommerceApi.Client
+      Jwt__ExpiryMinutes: "60"
+      DevSeedAdmin__Email: ${DEV_ADMIN_EMAIL:-admin@ecommerce.local}
+      DevSeedAdmin__Password: ${DEV_ADMIN_PASSWORD:-Admin@12345}
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
