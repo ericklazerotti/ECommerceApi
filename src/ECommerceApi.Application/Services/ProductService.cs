@@ -1,5 +1,6 @@
 using ECommerceApi.Application.Common.Exceptions;
 using ECommerceApi.Application.Common.Interfaces;
+using ECommerceApi.Application.Common.Models;
 using ECommerceApi.Application.DTOs;
 using ECommerceApi.Application.Mapping;
 using ECommerceApi.Application.Services.Interfaces;
@@ -16,10 +17,21 @@ public class ProductService : IProductService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<List<ProductDto>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedResult<ProductDto>> GetAllActiveAsync(ProductQueryParameters query, CancellationToken cancellationToken = default)
     {
-        var products = await _unitOfWork.Products.ListActiveAsync(cancellationToken);
-        return products.ToDto();
+        var page = Math.Max(query.Page, 1);
+        var pageSize = Math.Clamp(query.PageSize, 1, 100);
+
+        var (products, totalCount) = await _unitOfWork.Products.ListActivePagedAsync(
+            page, pageSize, query.CategoryId, query.Search, cancellationToken);
+
+        return new PagedResult<ProductDto>
+        {
+            Items = products.ToDto(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     public async Task<ProductDto> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

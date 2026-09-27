@@ -1,4 +1,5 @@
 using ECommerceApi.Application.Common.Constants;
+using ECommerceApi.Application.Common.Models;
 using ECommerceApi.Application.DTOs;
 using ECommerceApi.Application.Services.Interfaces;
 using FluentValidation;
@@ -27,8 +28,8 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<List<ProductDto>>> GetAll(CancellationToken cancellationToken) =>
-        Ok(await _productService.GetAllActiveAsync(cancellationToken));
+    public async Task<ActionResult<PagedResult<ProductDto>>> GetAll([FromQuery] ProductQueryParameters query, CancellationToken cancellationToken) =>
+        Ok(await _productService.GetAllActiveAsync(query, cancellationToken));
 
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
