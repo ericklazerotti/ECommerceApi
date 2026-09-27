@@ -104,6 +104,7 @@ Gaps conhecidos, deixados fora de escopo por ser um projeto de portfólio: sem r
 1. `POST /api/Auth/register` — cria um usuário com papel `Customer`.
 2. `POST /api/Auth/login` — retorna um JWT.
 3. Endpoints de escrita em `/api/Categories` e `/api/Products` exigem papel `Admin`.
+   `GET /api/Products` é paginado e aceita `page`, `pageSize` (máx. 100), `categoryId` e `search` (por nome, case-insensitive) como query string, retornando `{ items, page, pageSize, totalCount, totalPages }`.
 4. `POST /api/Orders` — cliente autenticado cria um pedido; a API valida estoque disponível e decrementa automaticamente.
 5. `POST /api/Orders/{id}/pay`, `/ship` — transições de status restritas a `Admin`.
 6. `POST /api/Orders/{id}/cancel` — cliente dono do pedido ou Admin; devolve o estoque reservado.
