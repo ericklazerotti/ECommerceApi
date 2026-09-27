@@ -29,7 +29,10 @@ public class ProductRepository : RepositoryBase<Product>, IProductRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(p => EF.Functions.ILike(p.Name, $"%{search}%"));
+            // ToLower().Contains() em vez de EF.Functions.ILike: traduz tanto no
+            // Postgres quanto no provider InMemory usado nos testes de unidade.
+            var normalizedSearch = search.Trim().ToLower();
+            query = query.Where(p => p.Name.ToLower().Contains(normalizedSearch));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
